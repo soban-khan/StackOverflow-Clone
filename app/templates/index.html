@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block app_content %}
+<h1>
+  Stack Overflow
+</h1>
+<p>
+    {% for question in question %}
+    Title : {{ question.title }}<br>
+    Query : <a href="{{ url_for('question', question_id=question.id) }}">{{ question.question}}</a><br>
+    Tags : 
+    {% for tags in tags %}
+    {{ tags.tags }}, 
+    {% endfor %}
+    <hr>
+    {% endfor %}
+</p>
+{% endblock %}

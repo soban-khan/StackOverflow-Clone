@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+<h1>Q: {{ question.question }}</h1>
+<div class="row">
+    <div class="col-md-4" style="margin: 2em 0em 0em 5em">
+        {{ wtf.quick_form(form) }}
+    </div>
+</div>
+<div style="margin-top: 2em">
+{% if answer %}
+<b>Answers:</b>
+<hr>
+{% for ans in answer %}
+<p style="font-size:1.5em; margin-left:5em">{{ ans }}<br></p><hr>
+{% endfor %}
+{% endif %}
+{% endblock %}
+</div>
