@@ -8,8 +8,8 @@
     Title : {{ question.title }}<br>
     Query : <a href="{{ url_for('question', question_id=question.id) }}">{{ question.question}}</a><br>
     Tags : 
-    {% for tags in tags %}
-    {{ tags.tags }}, 
+    {% for tag in question.question_to_tags.all() %}   
+    {{ Tag.query.get(tag.tag_id).tags}}
     {% endfor %}
     <hr>
     {% endfor %}

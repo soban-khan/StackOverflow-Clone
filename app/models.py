@@ -4,6 +4,7 @@ from flask_login import UserMixin
 from app import login
 from datetime import datetime
 
+
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key = True)
     name = db.Column(db.String(30), index = True)
@@ -27,9 +28,26 @@ class Question(db.Model):
     question = db.Column(db.String(250), index = True)
     timestamp = db.Column(db.DateTime, default = datetime.utcnow)
     answers = db.relationship('Answers', backref = 'which_question', lazy = 'dynamic')
+    question_to_tags = db.relationship('QuestionTag', backref = 'which_tag', lazy = 'dynamic')
 
     def __repr__(self):
        return '<Question:{}>'.format(self.question)
+
+
+class Tag(db.Model):
+    id = db.Column(db.Integer, primary_key = True)
+    tags = db.Column(db.String(20), unique = True, default='')
+    tags_to_question = db.relationship('QuestionTag', backref = 'which_question_tag',
+                     lazy = 'dynamic')
+
+    def __repr__(self):
+       return '{}'.format(self.tags)
+
+
+class QuestionTag(db.Model):
+    id = db.Column(db.Integer, primary_key = True)
+    question_id = db.Column(db.Integer, db.ForeignKey('question.id'))
+    tag_id = db.Column(db.Integer, db.ForeignKey('tag.id'))
 
 
 class Answers(db.Model):
@@ -42,13 +60,8 @@ class Answers(db.Model):
        return '{}'.format(self.answer)
 
 
-class Tag(db.Model):
-    id = db.Column(db.Integer, primary_key = True)
-    tags = db.Column(db.String(20), unique = True, default='')
-
-
 @login.user_loader
 def load_user(id):
     return User.query.get(int(id))
-    return Questions.query.get(int(id))
-    return Tags.query.get(int(id))
+    return Question.query.get(int(id))
+    return Tag.query.get(int(id))

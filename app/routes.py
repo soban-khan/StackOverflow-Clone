@@ -1,7 +1,7 @@
 from app import app,db
 from flask import render_template, url_for, redirect, flash, request
 from app.forms import LoginForm, RegistrationForm, QuestionForm, AnswerForm
-from app.models import User, Question, Answers, Tag
+from app.models import User, Question, Answers, Tag, QuestionTag
 from flask_login import current_user,login_user,logout_user,login_required
 from werkzeug.urls import url_parse
 
@@ -9,8 +9,9 @@ from werkzeug.urls import url_parse
 @app.route('/index')
 def index():
     question = Question.query.order_by(Question.timestamp.desc())
-    tags = Tag.query.all()
-    return render_template('index.html', question = question, tags = tags)
+    # q = Question.query.filter_by()
+    # tags = q.question_to_tags.all()
+    return render_template('index.html', question = question, Tag = Tag)
 
 
 @app.route('/login', methods = ['GET', 'POST'])
@@ -60,6 +61,7 @@ def questions():
     form = QuestionForm()
     if form.validate_on_submit():
         question = Question(title = form.title.data, question = form.question.data)
+        db.session.add(question)
         lets_split = form.tags.data
         splitted_list = lets_split.split(',')
         check = Tag.query.all()
@@ -71,7 +73,15 @@ def questions():
             if count == 0:
                     tag = Tag(tags = cursor)
                     db.session.add(tag)
-        db.session.add(question)
+
+                    tag_question_entry = QuestionTag(tag_id = Tag.query.filter_by(tags = cursor).first().id,
+                                                     question_id = question.id)
+                    db.session.add(tag_question_entry)
+            else:
+                tag_question_entry = QuestionTag(tag_id = Tag.query.filter_by(tags = cursor).first().id, 
+                                        question_id = question.id)
+                db.session.add(tag_question_entry)
+        
         db.session.commit()
         flash('Let the knowledgable answer')
         question = Question.query.order_by(Question.timestamp.desc()).first()
@@ -92,3 +102,22 @@ def question(question_id):
         return redirect(url_for('question', question_id=question.id))
     answer = question.answers.all()
     return render_template('question.html', question = question, form = form, answer = answer)
+
+
+# @app.route('/tags/<tag_id>')
+# def tag(tag_id):
+#     print(QuestionTag.query.filter_by(tag_id = tag_id).question_id.all())
+#     return "papa"
+
+@app.route('/edit_questions/<id>', methods = ['GET','POST'])
+def edit_questions(id):
+    temp = Question.query.get(id)
+    form = QuestionForm(obj = temp)    
+    for tag in temp.question_to_tags.all():
+        print(Tag.query.get(tag.tag_id).tags)
+    if form.validate_on_submit():
+        temp.question = form.question.data
+        temp.title = form.title.data
+        db.session.commit()
+        return redirect(url_for('questions', question_id = temp))
+    return render_template('question_form.html', form = form)

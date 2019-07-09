@@ -31,3 +31,7 @@ class QuestionForm(FlaskForm):
 class AnswerForm(FlaskForm):
     answer = TextAreaField('Share your thoughts', [DataRequired(), Length(min=10, max=500)])
     submit = SubmitField('Post')
+
+# class EditQuestion(FlaskForm):
+#     edit_question = TextAreaField('Edit ')
+
